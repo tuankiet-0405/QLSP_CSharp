@@ -1,0 +1,31 @@
+@model THLTW.Models.Category
+
+@{
+    ViewData["Title"] = "Xác nhận xóa danh mục";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>Bạn có chắc chắn muốn xóa danh mục này không?</h3>
+
+<div class="card">
+    <div class="card-header">
+        <h4>Thông tin danh mục</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+        </dl>
+    
+        <form asp-action="Delete" class="mt-3">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Xóa" class="btn btn-danger" /> 
+            <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+        </form>
+    </div>
+</div>

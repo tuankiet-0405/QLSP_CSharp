@@ -1,0 +1,588 @@
+@model THLTW.Models.ViewModels.RecommendationsViewModel
+
+@{
+    ViewData["Title"] = "Trí Tuệ Nhân Tạo - Xu Hướng 2024";
+}
+
+<style>
+    .ai-gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        color: white;
+    }
+    
+    .ai-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .ai-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .ai-feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin: 0 auto 15px;
+    }
+    
+    .chat-bubble {
+        background: #f8f9fa;
+        border-radius: 20px;
+        padding: 15px;
+        margin: 10px 0;
+        position: relative;
+    }
+    
+    .chat-bubble.ai {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        margin-left: 20px;
+    }
+    
+    .chat-bubble.user {
+        background: #e3f2fd;
+        margin-right: 20px;
+    }
+    
+    .typing-indicator {
+        display: none;
+        padding: 15px;
+    }
+    
+    .typing-indicator span {
+        height: 10px;
+        width: 10px;
+        float: left;
+        margin: 0 1px;
+        background-color: #667eea;
+        display: block;
+        border-radius: 50%;
+        opacity: 0.4;
+        animation: typing 1.4s infinite ease-in-out both;
+    }
+    
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+      keyframes typing {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+    
+    .search-glow {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        border: 2px solid #667eea;
+    }
+    
+    .trend-metric {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="ai-gradient-bg p-5 text-center">
+                <h1 class="display-4 mb-3">
+                    🤖 <strong>Trí Tuệ Nhân Tạo</strong> 
+                    <span class="badge badge-light text-primary">2024</span>
+                </h1>
+                <p class="lead mb-4">Khám phá tương lai mua sắm thông minh với AI tiên tiến</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-3">
+                        <div class="trend-metric">
+                            <h3 id="aiAccuracy">98.5%</h3>
+                            <small>Độ chính xác AI</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="trend-metric">
+                            <h3 id="processingSpeed">0.2s</h3>
+                            <small>Tốc độ xử lý</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="trend-metric">
+                            <h3 id="recommendationsToday">1,247</h3>
+                            <small>Gợi ý hôm nay</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Features Grid -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="ai-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="ai-feature-icon" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24);">
+                        🧠
+                    </div>
+                    <h5 class="card-title">AI Chatbot Thông Minh</h5>
+                    <p class="card-text">Trợ lý AI 24/7 hiểu tiếng Việt tự nhiên, tư vấn sản phẩm chuyên nghiệp</p>
+                    <button class="btn btn-primary btn-lg" onclick="openChatbot()">
+                        <i class="fas fa-comment-dots"></i> Trò chuyện ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="ai-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="ai-feature-icon" style="background: linear-gradient(45deg, #20bf6b, #01a3a4);">
+                        🔍
+                    </div>
+                    <h5 class="card-title">Tìm Kiếm AI Siêu Thông Minh</h5>
+                    <p class="card-text">Tìm kiếm bằng giọng nói, hình ảnh hoặc mô tả tự nhiên</p>
+                    <button class="btn btn-success btn-lg" onclick="openSmartSearch()">
+                        <i class="fas fa-search"></i> Tìm kiếm AI
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="ai-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="ai-feature-icon" style="background: linear-gradient(45deg, #a55eea, #26de81);">
+                        ⭐
+                    </div>
+                    <h5 class="card-title">Gợi Ý Cá Nhân Hóa</h5>
+                    <p class="card-text">AI phân tích sở thích cá nhân để đưa ra gợi ý hoàn hảo</p>
+                    <button class="btn btn-warning btn-lg" onclick="loadPersonalizedRecommendations()">
+                        <i class="fas fa-magic"></i> Khám phá
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Section -->
+    <div class="row mb-5" id="chatbotSection" style="display: none;">
+        <div class="col-12">
+            <div class="ai-card">
+                <div class="card-header ai-gradient-bg">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot"></i> AI Assistant - Trợ lý thông minh
+                        <button type="button" class="close text-white float-right" onclick="closeChatbot()">
+                            <span>&times;</span>
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body" style="height: 400px; overflow-y: auto;" id="chatMessages">
+                    <div class="chat-bubble ai">
+                        <strong>AI Assistant:</strong> Xin chào! Tôi là trợ lý AI của THLTW. Tôi có thể giúp bạn:
+                        <ul class="mt-2 mb-0">
+                            <li>🛍️ Tìm sản phẩm phù hợp</li>
+                            <li>💰 So sánh giá cả</li>
+                            <li>⭐ Đọc đánh giá sản phẩm</li>
+                            <li>📦 Theo dõi đơn hàng</li>
+                        </ul>
+                        Bạn cần hỗ trợ gì hôm nay?
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <input type="text" id="chatInput" class="form-control" placeholder="Nhập câu hỏi của bạn..." onkeypress="handleChatKeyPress(event)">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            <button class="btn btn-info" onclick="startVoiceInput()">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="typing-indicator" id="typingIndicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Search Section -->
+    <div class="row mb-5" id="smartSearchSection" style="display: none;">
+        <div class="col-12">
+            <div class="ai-card">
+                <div class="card-header ai-gradient-bg">
+                    <h5 class="mb-0">
+                        <i class="fas fa-search"></i> Tìm Kiếm AI Thông Minh
+                        <button type="button" class="close text-white float-right" onclick="closeSmartSearch()">
+                            <span>&times;</span>
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Mô tả sản phẩm bạn muốn tìm:</label>
+                                <textarea id="smartSearchInput" class="form-control search-glow" rows="3" 
+                                    placeholder="VD: Tôi muốn tìm một chiếc điện thoại có camera tốt, pin trâu, giá dưới 10 triệu..."></textarea>
+                            </div>
+                            <div class="btn-group btn-block">
+                                <button class="btn btn-primary" onclick="performSmartSearch()">
+                                    <i class="fas fa-brain"></i> Tìm kiếm AI
+                                </button>
+                                <button class="btn btn-info" onclick="searchByVoice()">
+                                    <i class="fas fa-microphone"></i> Tìm bằng giọng nói
+                                </button>
+                                <button class="btn btn-success" onclick="searchByImage()">
+                                    <i class="fas fa-camera"></i> Tìm bằng hình ảnh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>💡 Gợi ý tìm kiếm:</h6>
+                                    <div class="d-flex flex-wrap">
+                                        <span class="badge badge-primary m-1 cursor-pointer" onclick="setSearchText('laptop gaming RTX')">Laptop Gaming RTX</span>
+                                        <span class="badge badge-success m-1 cursor-pointer" onclick="setSearchText('điện thoại camera đẹp')">Điện thoại camera đẹp</span>
+                                        <span class="badge badge-warning m-1 cursor-pointer" onclick="setSearchText('tai nghe không dây')">Tai nghe không dây</span>
+                                        <span class="badge badge-info m-1 cursor-pointer" onclick="setSearchText('đồng hồ thông minh')">Đồng hồ thông minh</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Results Section -->
+    <div class="row" id="aiResultsSection" style="display: none;">
+        <div class="col-12">
+            <div class="ai-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-magic"></i> Kết quả AI</h5>
+                </div>
+                <div class="card-body" id="aiResults">
+                    <!-- AI results will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // AI Chatbot Functions
+        function openChatbot() {
+            document.getElementById('chatbotSection').style.display = 'block';
+            document.getElementById('chatInput').focus();
+        }
+
+        function closeChatbot() {
+            document.getElementById('chatbotSection').style.display = 'none';
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Simulate AI response (replace with actual AI API call)
+            setTimeout(() => {
+                hideTypingIndicator();
+                const aiResponse = generateAIResponse(message);
+                addChatMessage(aiResponse, 'ai');
+            }, 1500);
+        }
+
+        function addChatMessage(message, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${sender}`;
+            
+            if (sender === 'ai') {
+                bubble.innerHTML = `<strong>AI Assistant:</strong> ${message}`;
+            } else {
+                bubble.innerHTML = `<strong>Bạn:</strong> ${message}`;
+            }
+            
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'block';
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function generateAIResponse(userMessage) {
+            const responses = {
+                'giá': 'Tôi có thể giúp bạn tìm sản phẩm theo mức giá mong muốn. Bạn đang quan tâm đến loại sản phẩm nào?',
+                'điện thoại': 'Chúng tôi có nhiều dòng điện thoại từ phân khúc giá rẻ đến cao cấp. Bạn có mức ngân sách cụ thể không?',
+                'laptop': 'Laptop của chúng tôi có đầy đủ từ văn phòng đến gaming. Bạn sử dụng chủ yếu để làm gì?',
+                'giao hàng': 'Chúng tôi có giao hàng toàn quốc trong 1-3 ngày. Bạn có muốn xem thông tin chi tiết không?',
+                'bảo hành': 'Tất cả sản phẩm đều có bảo hành chính hãng. Bạn quan tâm sản phẩm nào?'
+            };
+
+            // Simple keyword matching
+            for (let keyword in responses) {
+                if (userMessage.toLowerCase().includes(keyword)) {
+                    return responses[keyword];
+                }
+            }
+
+            return 'Cảm ơn bạn đã liên hệ! Tôi đang học hỏi thêm để phục vụ bạn tốt hơn. Bạn có thể nêu rõ hơn nhu cầu của mình không?';
+        }
+
+        // Smart Search Functions
+        function openSmartSearch() {
+            document.getElementById('smartSearchSection').style.display = 'block';
+            document.getElementById('smartSearchInput').focus();
+        }
+
+        function closeSmartSearch() {
+            document.getElementById('smartSearchSection').style.display = 'none';
+        }
+
+        function setSearchText(text) {
+            document.getElementById('smartSearchInput').value = text;
+        }
+
+        function performSmartSearch() {
+            const query = document.getElementById('smartSearchInput').value.trim();
+            if (!query) return;
+
+            showAIResults();
+            document.getElementById('aiResults').innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                    <h5>Đang phân tích yêu cầu của bạn...</h5>
+                    <p class="text-muted">AI đang tìm kiếm sản phẩm phù hợp nhất</p>
+                </div>
+            `;
+
+            // Simulate AI search (replace with actual API call)
+            setTimeout(() => {
+                document.getElementById('aiResults').innerHTML = generateSearchResults(query);
+            }, 2000);
+        }
+
+        function searchByVoice() {
+            alert('🎤 Tính năng tìm kiếm bằng giọng nói sẽ được phát triển trong phiên bản tiếp theo!');
+        }
+
+        function searchByImage() {
+            alert('📷 Tính năng tìm kiếm bằng hình ảnh sẽ được phát triển trong phiên bản tiếp theo!');
+        }
+
+        function showAIResults() {
+            document.getElementById('aiResultsSection').style.display = 'block';
+        }
+
+        function generateSearchResults(query) {
+            return `
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-check-circle"></i> Tìm thấy 15 sản phẩm phù hợp với yêu cầu: "${query}"</h6>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>iPhone 15 Pro Max</h6>
+                                <p class="text-muted">Camera 48MP, A17 Pro, 256GB</p>
+                                <h5 class="text-primary">29.990.000 VNĐ</h5>
+                                <small class="text-success">Độ phù hợp: 95%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Samsung Galaxy S24 Ultra</h6>
+                                <p class="text-muted">Camera 200MP, Snapdragon 8 Gen 3</p>
+                                <h5 class="text-primary">27.990.000 VNĐ</h5>
+                                <small class="text-success">Độ phù hợp: 92%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Xiaomi 14 Ultra</h6>
+                                <p class="text-muted">Camera Leica, Snapdragon 8 Gen 3</p>
+                                <h5 class="text-primary">24.990.000 VNĐ</h5>
+                                <small class="text-success">Độ phù hợp: 88%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary">Xem tất cả kết quả</button>
+                </div>
+            `;
+        }
+
+        function loadPersonalizedRecommendations() {
+            showAIResults();
+            document.getElementById('aiResults').innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-magic fa-spin fa-3x text-warning mb-3"></i>
+                    <h5>Đang phân tích sở thích của bạn...</h5>
+                    <p class="text-muted">AI đang tạo gợi ý cá nhân hóa</p>
+                </div>
+            `;
+
+            // Call actual API
+            setTimeout(() => {
+                fetch('/api/ai/recommendations/personalized?count=6')
+                    .then(response => response.json())
+                    .then(data => {
+                        displayPersonalizedRecommendations(data);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('aiResults').innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                Có lỗi xảy ra khi tải gợi ý. Vui lòng thử lại sau.
+                            </div>
+                        `;
+                    });
+            }, 1000);
+        }
+
+        function displayPersonalizedRecommendations(products) {
+            if (!products || products.length === 0) {
+                document.getElementById('aiResults').innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>Chưa có đủ dữ liệu để tạo gợi ý cá nhân</h5>
+                        <p class="text-muted">Hãy mua sắm thêm để AI học hỏi sở thích của bạn!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-user-check"></i> Dành riêng cho bạn - ${products.length} gợi ý được cá nhân hóa</h6>
+                </div>
+                <div class="row">
+            `;
+
+            products.forEach(product => {
+                html += `
+                    <div class="col-md-4 mb-4">
+                        <div class="card ai-card">
+                            <div class="card-body">
+                                <h6 class="card-title">${product.name}</h6>
+                                <p class="text-muted">${product.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="text-primary mb-0">${formatPrice(product.price)} VNĐ</h5>
+                                    <div class="badge badge-success">AI Match</div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-info">
+                                        <i class="fas fa-star"></i> Phù hợp với sở thích của bạn
+                                    </small>
+                                </div>
+                                <button class="btn btn-primary btn-sm btn-block mt-2" onclick="addToCart(${product.id})">
+                                    <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            document.getElementById('aiResults').innerHTML = html;
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN').format(price);
+        }
+
+        function addToCart(productId) {
+            // Implement add to cart functionality
+            alert(`Đã thêm sản phẩm ${productId} vào giỏ hàng!`);
+        }
+
+        function startVoiceInput() {
+            alert('🎤 Tính năng nhập giọng nói sẽ được phát triển trong phiên bản tiếp theo!');
+        }
+
+        // Initialize metrics animation
+        document.addEventListener('DOMContentLoaded', function() {
+            animateMetrics();
+        });
+
+        function animateMetrics() {
+            // Animate accuracy
+            let accuracy = 0;
+            const targetAccuracy = 98.5;
+            const accuracyInterval = setInterval(() => {
+                accuracy += 0.5;
+                document.getElementById('aiAccuracy').textContent = accuracy.toFixed(1) + '%';
+                if (accuracy >= targetAccuracy) clearInterval(accuracyInterval);
+            }, 20);
+
+            // Animate processing speed
+            let speed = 1.0;
+            const targetSpeed = 0.2;
+            const speedInterval = setInterval(() => {
+                speed -= 0.05;
+                document.getElementById('processingSpeed').textContent = speed.toFixed(1) + 's';
+                if (speed <= targetSpeed) {
+                    document.getElementById('processingSpeed').textContent = targetSpeed + 's';
+                    clearInterval(speedInterval);
+                }
+            }, 30);
+
+            // Animate recommendations count
+            let count = 0;
+            const targetCount = 1247;
+            const countInterval = setInterval(() => {
+                count += 50;
+                document.getElementById('recommendationsToday').textContent = count.toLocaleString();
+                if (count >= targetCount) {
+                    document.getElementById('recommendationsToday').textContent = targetCount.toLocaleString();
+                    clearInterval(countInterval);
+                }
+            }, 50);
+        }
+    </script>
+}

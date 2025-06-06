@@ -1,0 +1,101 @@
+@model THLTW.Models.Product
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Sản phẩm";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Sản phẩm</h4>
+<hr />
+<div class="row justify-content-center">
+    <div class="col-md-8"> 
+        <form asp-action="Edit" enctype="multipart/form-data"> 
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ImageUrl" />
+            
+            @* @if (Model.AdditionalImageUrls != null)
+            {
+                foreach (var imageUrl in Model.AdditionalImageUrls)
+                {
+                    <input type="hidden" name="AdditionalImageUrls" value="@imageUrl" />
+                }
+            } *@
+            @if (Model.AdditionalImages != null)
+            {
+                for (int i = 0; i < Model.AdditionalImages.Count; i++)
+                {
+                    <input type="hidden" asp-for="AdditionalImages[i].Id" />
+                    <input type="hidden" asp-for="AdditionalImages[i].ImageUrl" />
+                    <input type="hidden" asp-for="AdditionalImages[i].ProductId" />
+                }
+            }
+
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" type="number" step="any" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">Hình ảnh chính hiện tại</label><br />
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Url.Content(Model.ImageUrl)" alt="Hình ảnh sản phẩm" style="max-width:150px; max-height:150px; margin-bottom:10px;" />
+                }
+                else
+                {
+                    <span>Không có hình ảnh chính.</span>
+                }
+                <br />
+                <label for="mainImage" class="control-label">Thay đổi hình ảnh chính</label>
+                <input type="file" id="mainImage" name="mainImage" class="form-control-file" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">Hình ảnh bổ sung hiện tại</label><br />
+                @if (Model.AdditionalImages != null && Model.AdditionalImages.Any())
+                {
+                    foreach (var image in Model.AdditionalImages)
+                    {
+                        <img src="@Url.Content(image.ImageUrl)" alt="Hình ảnh bổ sung" style="max-width:100px; max-height:100px; margin-right:5px; margin-bottom:5px;" />
+                    }
+                }
+                else
+                {
+                    <span>Không có hình ảnh bổ sung.</span>
+                }
+                <br />
+                <label for="additionalImages" class="control-label">Thêm hoặc thay thế hình ảnh bổ sung (chọn nhiều file)</label>
+                <input type="file" id="additionalImages" name="additionalImages" class="form-control-file" multiple />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CategoryId" class="control-label"></label>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
+                    <option value="">-- Select Category --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-4">
+                <input type="submit" value="Lưu thay đổi" class="btn btn-primary btn-lg" />
+                <a asp-action="Index" class="btn btn-outline-secondary btn-lg ml-2">Trở về danh sách</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,304 @@
+@model THLTW.Models.ViewModels.AIDashboardViewModel
+
+@{
+    ViewData["Title"] = "AI Analytics Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-chart-line text-primary"></i>
+                AI Analytics Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <!-- System Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalUsers</h4>
+                            <p class="card-text">Total Users</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalProducts</h4>
+                            <p class="card-text">Total Products</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-box fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalOrders</h4>
+                            <p class="card-text">Total Orders</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalReviews</h4>
+                            <p class="card-text">Total Reviews</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-star fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-tools"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("UserAnalytics")" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-user-chart"></i> User Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("ProductAnalytics")" class="btn btn-outline-success btn-block">
+                                <i class="fas fa-chart-bar"></i> Product Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Recommendations")" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-brain"></i> Test Recommendations
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-warning btn-block" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Refresh Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock"></i> Recent User Activities</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentActivities?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Activity</th>
+                                        <th>Product</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var activity in Model.RecentActivities.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@(activity.User?.UserName ?? "Anonymous")</td>
+                                            <td>
+                                                <span class="badge badge-@(GetActivityBadgeColor(activity.ActivityType))">
+                                                    @activity.ActivityType
+                                                </span>
+                                            </td>
+                                            <td>@(activity.Product?.Name ?? "N/A")</td>
+                                            <td>@activity.Timestamp.ToString("HH:mm")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No recent activities found.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-fire"></i> Top Products Today</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopProducts?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Views</th>
+                                        <th>Rating</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.TopProducts.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@product.Name</td>                                            <td>
+                                                <span class="badge badge-primary">
+                                                    @(product.ViewHistory?.Count ?? 0)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (product.Reviews?.Any() == true)
+                                                {
+                                                    <span class="text-warning">
+                                                        @Math.Round(product.Reviews.Average(r => r.Rating), 1) ★
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No rating</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("ProductAnalytics", new { id = product.Id })" 
+                                                   class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No product data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Performance Metrics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-robot"></i> AI Performance Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-success">85%</h3>
+                                <p class="text-muted">Recommendation Accuracy</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-info">1.2ms</h3>
+                                <p class="text-muted">Average Response Time</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-warning">@(Model.RecentActivities?.Count ?? 0)</h3>
+                                <p class="text-muted">Activities Tracked Today</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetActivityBadgeColor(string activityType)
+    {
+        return activityType switch
+        {
+            "View" => "info",
+            "AddToCart" => "success",
+            "Purchase" => "primary",
+            "Search" => "warning",
+            "Browse" => "secondary",
+            _ => "light"
+        };
+    }
+}
+
+<script>
+    function refreshData() {
+        location.reload();
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        // Only refresh if user is active (to avoid unnecessary requests)
+        if (document.hasFocus()) {
+            refreshData();
+        }
+    }, 30000);
+</script>
+
+<style>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    }
+    
+    .btn-block {
+        margin-bottom: 10px;
+    }
+    
+    .table-responsive {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>

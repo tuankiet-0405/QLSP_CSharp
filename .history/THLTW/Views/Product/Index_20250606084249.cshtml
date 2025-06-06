@@ -1,0 +1,640 @@
+@model IEnumerable<THLTW.Models.Product>
+
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+    var categories = ViewBag.Categories as SelectList;
+    var minPrice = ViewBag.MinPrice as decimal?;
+    var maxPrice = ViewBag.MaxPrice as decimal?;
+    var searchTerm = ViewBag.SearchTerm as string;
+    var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Thêm sản phẩm</a>
+</p>
+
+<!-- Filter and Sort Section -->
+<div class="filter-sort-section mb-4">
+    <form asp-action="Index" method="get">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="categoryId">Danh mục</label>
+                    <select name="categoryId" id="categoryId" class="form-control" asp-items="categories">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="minPrice">Giá từ</label>
+                    <input type="number" name="minPrice" id="minPrice" class="form-control" value="@minPrice" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="maxPrice">Giá đến</label>
+                    <input type="number" name="maxPrice" id="maxPrice" class="form-control" value="@maxPrice" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="searchTerm">Tìm kiếm</label>
+                    <input type="text" name="searchTerm" id="searchTerm" class="form-control" value="@searchTerm" />
+                </div>
+            </div>
+            @* <div class="col-md-2 align-self-end">
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Lọc</button>
+                </div>
+            </div> *@
+        </div>
+    </form>
+</div>
+
+<div class="product-list">
+@foreach (var item in Model) {
+        <div class="product-card">
+            @if (!string.IsNullOrEmpty(item.ImageUrl))
+            {
+                <img src="@Url.Content(item.ImageUrl)" alt="@item.Name" class="card-img-top"/>
+            }
+            else
+            {
+                <img src="https://via.placeholder.com/300x200.png?text=No+Image" alt="No image available" class="card-img-top"/>
+            }
+            <div class="card-body">
+                <h5 class="card-title">@Html.DisplayFor(modelItem => item.Name)</h5>
+                
+                <div class="price-container">
+                    <p class="price">@item.Price.ToString("N0")đ</p>
+                    @* <p class="original-price">1.200.000đ</p> *@ @* Placeholder for original price *@
+                </div>
+                @* <span class="discount-label">-15%</span> *@ @* Placeholder for discount label *@
+
+                <div class="product-labels my-2">
+                    @* <span class="label label-installment">Trả góp 0%</span> *@ @* Placeholder for labels *@
+                    @* <span class="label label-sale">Giảm giá</span> *@
+                </div>
+
+                <div class="rating mb-2">
+                    <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>☆</span> @* Placeholder for rating *@
+                </div>
+                
+                <p class="card-text short-desc">@Html.DisplayFor(modelItem => item.Description)</p>
+                
+                <div class="action-buttons mb-2">
+                    <button class="btn btn-primary btn-buy">Mua ngay</button>
+                    <button class="btn btn-secondary btn-add-to-cart" data-product-id="@item.Id">Thêm vào giỏ</button>
+                </div>
+                 <div class="admin-actions mt-2">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+}
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination-controls mt-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @if (ViewBag.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Index", new { pageNumber = ViewBag.PageNumber - 1, categoryId = ViewBag.SelectedCategoryId, minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, searchTerm = ViewBag.SearchTerm })">Trước</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Trước</span>
+                </li>
+            }
+
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.PageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, categoryId = ViewBag.SelectedCategoryId, minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, searchTerm = ViewBag.SearchTerm })">@i</a>
+                </li>
+            }
+
+            @if (ViewBag.PageNumber < ViewBag.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Index", new { pageNumber = ViewBag.PageNumber + 1, categoryId = ViewBag.SelectedCategoryId, minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, searchTerm = ViewBag.SearchTerm })">Sau</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Sau</span>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-submit filter form on change
+            $('#categoryId, #minPrice, #maxPrice, #searchTerm').on('change', function() {
+                $(this).closest('form').submit();
+            });
+
+            $('.btn-add-to-cart').on('click', function() { // Changed selector
+                console.log('Add to cart button clicked.'); // DEBUG LINE
+                var productId = $(this).data('product-id'); // Reads data-product-id
+                console.log('Product ID:', productId); // DEBUG LINE
+                
+                var token = $('input[name="__RequestVerificationToken"]').val();
+                console.log('Token:', token); // DEBUG LINE
+
+                if (!productId) {
+                    console.error('Product ID not found. Make sure the button has data-product-id attribute.');
+                    alert('Lỗi: Không tìm thấy ID sản phẩm.');
+                    return;
+                }
+                if (!token) {
+                    console.error('Anti-forgery token not found. Make sure @Html.AntiForgeryToken() is present in a form on the page, or the hidden form in _Layout.cshtml is correctly implemented.');
+                    alert('Lỗi: Token xác thực không tìm thấy.');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "Cart")',
+                    type: 'POST',
+                    data: { productId: productId, quantity: 1 }, // Default quantity to 1
+                    headers: {
+                        RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() // If you have AntiForgeryToken in a form
+                    },
+                    success: function(response) {
+                        if(response.success) {
+                            alert(response.message); // Hiển thị thông báo thành công
+                            // Update cart item count in navbar
+                            if (typeof handleAddToCartSuccess === 'function') {
+                                handleAddToCartSuccess(response.itemCount);
+                            }
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    /* Product List Page Styles */
+/* =========================== */
+
+/* Page Title */
+h1 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 2.5rem;
+    position: relative;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(45deg, #3498db, #2ecc71);
+    border-radius: 2px;
+}
+
+/* Add Product Button */
+.btn-success {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+/* Filter Section */
+.filter-sort-section {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dee2e6;
+}
+
+.filter-sort-section .form-group {
+    margin-bottom: 1rem;
+}
+
+.filter-sort-section label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-sort-section .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.filter-sort-section .form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    outline: none;
+}
+
+/* Product Grid */
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+    margin-top: 2rem;
+}
+
+/* Product Card */
+.product-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid #f1f3f4;
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #2ecc71, #e74c3c, #f39c12);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+.product-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Product Image */
+.product-card .card-img-top {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* Card Body */
+.product-card .card-body {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+}
+
+/* Product Title */
+.product-card .card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 3.6rem;
+}
+
+/* Price Container */
+.price-container {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #e74c3c;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Rating */
+.rating {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #f39c12;
+}
+
+.rating span {
+    margin-right: 2px;
+    transition: color 0.2s ease;
+}
+
+.rating:hover span {
+    color: #e67e22;
+}
+
+/* Description */
+.product-card .short-desc {
+    font-size: 0.95rem;
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 4.8rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.action-buttons .btn {
+    flex: 1;
+    padding: 12px 0;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border: none;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2980b9, #3498db);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    border: none;
+    box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+}
+
+/* Admin Actions */
+.admin-actions {
+    border-top: 2px solid #f8f9fa;
+    padding-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.admin-actions .btn-sm {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+}
+
+.btn-outline-info {
+    border-color: #17a2b8;
+    color: #17a2b8;
+}
+
+.btn-outline-info:hover {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Pagination */
+.pagination-controls {
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
+.pagination {
+    justify-content: center;
+    margin: 0;
+}
+
+.page-item .page-link {
+    color: #495057;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    margin: 0 3px;
+    padding: 12px 18px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.page-item .page-link:hover {
+    color: #3498db;
+    border-color: #3498db;
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-color: #3498db;
+    color: white;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.page-item.disabled .page-link {
+    color: #adb5bd;
+    border-color: #e9ecef;
+    background-color: #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .product-list {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .filter-sort-section .row {
+        margin: 0;
+    }
+    
+    .filter-sort-section .col-md-3,
+    .filter-sort-section .col-md-2 {
+        margin-bottom: 15px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .product-card .card-body {
+        padding: 20px;
+        min-height: auto;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .admin-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-sort-section {
+        padding: 20px 15px;
+    }
+    
+    .product-card .card-body {
+        padding: 15px;
+    }
+    
+    .price {
+        font-size: 1.5rem;
+    }
+}
+
+/* Loading Animation */
+.product-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for cards */
+.product-card:nth-child(1) { animation-delay: 0.1s; }
+.product-card:nth-child(2) { animation-delay: 0.2s; }
+.product-card:nth-child(3) { animation-delay: 0.3s; }
+.product-card:nth-child(4) { animation-delay: 0.4s; }
+.product-card:nth-child(5) { animation-delay: 0.5s; }
+.product-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Smooth transitions for filter changes */
+.product-list {
+    transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #2980b9, #27ae60);
+}
+
+</style>

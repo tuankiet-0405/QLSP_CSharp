@@ -1,0 +1,462 @@
+@model THLTW.Models.ViewModels.ProductAnalyticsViewModel
+
+@{
+    ViewData["Title"] = "Product Analytics";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-chart-bar text-success"></i>
+                    Product Analytics
+                </h1>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Selection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-search"></i> Select Product</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <select name="productId" class="form-control" onchange="this.form.submit()">
+                                    <option value="">Select a product...</option>
+                                    @if (Model.AllProducts != null)
+                                    {                                        @foreach (var product in Model.AllProducts)
+                                        {
+                                            var isSelected = product.Id == Model.SelectedProductId;
+                                            <option value="@product.Id" selected="@isSelected">
+                                                @product.Name - $@product.Price
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-analytics"></i> Analyze Product
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.SelectedProduct != null)
+    {
+        <!-- Product Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h3>@Model.TotalViews</h3>
+                        <p>Total Views</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h3>@Model.UniqueViewers</h3>
+                        <p>Unique Viewers</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h3>@Model.TotalReviews</h3>
+                        <p>Total Reviews</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h3>@(Model.AverageRating > 0 ? Model.AverageRating.ToString("F1") : "N/A")</h3>
+                        <p>Average Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-box"></i> Product Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                @if (!string.IsNullOrEmpty(Model.SelectedProduct.ImageUrl))
+                                {
+                                    <img src="@Model.SelectedProduct.ImageUrl" class="img-fluid rounded" alt="@Model.SelectedProduct.Name" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light p-4 text-center rounded">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                        <p class="text-muted mt-2">No Image</p>
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-8">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Name:</strong></td>
+                                        <td>@Model.SelectedProduct.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Price:</strong></td>
+                                        <td class="text-success"><strong>$@Model.SelectedProduct.Price</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Category:</strong></td>
+                                        <td>@Model.SelectedProduct.Category?.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Stock:</strong></td>
+                                        <td>
+                                            <span class="badge badge-@(Model.SelectedProduct.StockQuantity > 0 ? "success" : "danger")">
+                                                @Model.SelectedProduct.StockQuantity units
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Description:</strong></td>
+                                        <td>@(Model.SelectedProduct.Description ?? "No description available")</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie"></i> View Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.ViewsByDay?.Any() == true)
+                        {
+                            <canvas id="viewsChart" width="300" height="200"></canvas>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center">No view data available</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Views -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-eye"></i> Recent Views</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.RecentViews?.Any() == true)
+                        {
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Time</th>
+                                            <th>Duration</th>
+                                            <th>Source</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var view in Model.RecentViews.Take(10))
+                                        {
+                                            <tr>
+                                                <td>@(view.User?.UserName ?? "Anonymous")</td>
+                                                <td>@view.ViewedAt.ToString("MMM dd, HH:mm")</td>
+                                                <td>@(view.ViewDuration?.ToString(@"mm\:ss") ?? "N/A")</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(view.SessionId))
+                                                    {
+                                                        <small class="text-info">Session</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <small class="text-muted">Direct</small>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No recent views found.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-star"></i> Recent Reviews</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.RecentReviews?.Any() == true)
+                        {
+                            <div style="max-height: 400px; overflow-y: auto;">
+                                @foreach (var review in Model.RecentReviews.Take(5))
+                                {
+                                    <div class="mb-3 border-bottom pb-2">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>@(review.User?.UserName ?? "Anonymous")</strong>
+                                            <div>
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                        <p class="small mb-1">@review.Comment</p>
+                                        <small class="text-info">@review.ReviewDate.ToString("MMM dd, yyyy")</small>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No reviews yet.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-tachometer-alt"></i> Performance Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-primary">@(Model.ConversionRate > 0 ? Model.ConversionRate.ToString("P1") : "0%")</h4>
+                                    <p class="text-muted">Conversion Rate</p>
+                                    <small class="text-info">Views to Cart Adds</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-success">@(Model.AverageViewDuration > 0 ? Model.AverageViewDuration.ToString("F1") + "s" : "N/A")</h4>
+                                    <p class="text-muted">Avg View Duration</p>
+                                    <small class="text-info">Time spent viewing</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-warning">@(Model.BounceRate > 0 ? Model.BounceRate.ToString("P1") : "0%")</h4>
+                                    <p class="text-muted">Bounce Rate</p>
+                                    <small class="text-info">Single page views</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-info">@Model.ViewTrend</h4>
+                                    <p class="text-muted">7-Day Trend</p>
+                                    <small class="text-info">
+                                        @if (Model.ViewTrend > 0)
+                                        {
+                                            <i class="fas fa-arrow-up text-success"></i> <span class="text-success">Growing</span>
+                                        }
+                                        else if (Model.ViewTrend < 0)
+                                        {
+                                            <i class="fas fa-arrow-down text-danger"></i> <span class="text-danger">Declining</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-minus text-warning"></i> <span class="text-warning">Stable</span>
+                                        }
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Similar Products & Recommendations -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-lightbulb"></i> AI Insights & Similar Products</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-primary" onclick="loadSimilarProducts(@Model.SelectedProductId)">
+                                    <i class="fas fa-search"></i> Find Similar Products
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-info" onclick="loadTrendingProducts()">
+                                    <i class="fas fa-fire"></i> Load Trending Products
+                                </button>
+                            </div>
+                        </div>
+                        <div id="insights-container" class="mt-3" style="display: none;">
+                            <div class="row" id="insights-list">
+                                <!-- Similar products will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i>
+                    Please select a product to view its analytics.
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    @if (Model.SelectedProduct != null && Model.ViewsByDay?.Any() == true)
+    {
+        <text>
+        // Views Chart
+        const ctx = document.getElementById('viewsChart').getContext('2d');
+        const viewsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.ViewsByDay.Keys)),
+                datasets: [{
+                    label: 'Views',
+                    data: @Html.Raw(Json.Serialize(Model.ViewsByDay.Values)),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        </text>
+    }
+
+    async function loadSimilarProducts(productId) {
+        const container = document.getElementById('insights-container');
+        const list = document.getElementById('insights-list');
+        
+        try {
+            container.style.display = 'block';
+            list.innerHTML = '<div class="col-12 text-center"><i class="fas fa-spinner fa-spin"></i> Loading similar products...</div>';
+            
+            const response = await fetch(`/api/ai/similar-products/${productId}`);
+            const products = await response.json();
+            
+            if (products && products.length > 0) {
+                list.innerHTML = '';
+                products.forEach(product => {
+                    list.innerHTML += `
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.name}</h6>
+                                    <p class="card-text small">${product.description ? product.description.substring(0, 80) + '...' : 'No description'}</p>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="badge badge-success">$${product.price}</span>
+                                        <span class="badge badge-info">Match: ${Math.round(product.similarity * 100)}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                list.innerHTML = '<div class="col-12"><div class="alert alert-warning">No similar products found.</div></div>';
+            }
+        } catch (error) {
+            list.innerHTML = '<div class="col-12"><div class="alert alert-danger">Error loading similar products.</div></div>';
+            console.error('Error loading similar products:', error);
+        }
+    }
+
+    async function loadTrendingProducts() {
+        const container = document.getElementById('insights-container');
+        const list = document.getElementById('insights-list');
+        
+        try {
+            container.style.display = 'block';
+            list.innerHTML = '<div class="col-12 text-center"><i class="fas fa-spinner fa-spin"></i> Loading trending products...</div>';
+            
+            const response = await fetch('/api/ai/trending-products');
+            const products = await response.json();
+            
+            if (products && products.length > 0) {
+                list.innerHTML = '';
+                products.forEach(product => {
+                    list.innerHTML += `
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-fire text-warning"></i> ${product.name}
+                                    </h6>
+                                    <p class="card-text small">${product.description ? product.description.substring(0, 80) + '...' : 'No description'}</p>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="badge badge-success">$${product.price}</span>
+                                        <span class="badge badge-warning">Trending</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                list.innerHTML = '<div class="col-12"><div class="alert alert-warning">No trending products found.</div></div>';
+            }
+        } catch (error) {
+            list.innerHTML = '<div class="col-12"><div class="alert alert-danger">Error loading trending products.</div></div>';
+            console.error('Error loading trending products:', error);
+        }
+    }
+</script>

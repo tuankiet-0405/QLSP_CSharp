@@ -1,0 +1,116 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Đăng Nhập";
+}
+
+@* Thêm CSS file vào trang này *@
+@section Styles {
+    <link rel="stylesheet" href="~/css/login.css" />
+}
+
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Phần đăng nhập chính -->
+        <div class="login-section">
+            <div class="login-header">
+                <h1 class="login-title">Chào Mừng Trở Lại</h1>
+                <p class="login-subtitle">Đăng nhập vào tài khoản của bạn</p>
+            </div>
+            
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                
+                <div class="form-floating">
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label asp-for="Input.Email" class="form-label">Email</label>
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                
+                <div class="form-floating">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label asp-for="Input.Password" class="form-label">Mật khẩu</label>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                
+                <div class="checkbox">
+                    <label asp-for="Input.RememberMe" class="form-label">
+                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                        @Html.DisplayNameFor(m => m.Input.RememberMe)
+                    </label>
+                </div>
+                
+                <button id="login-submit" type="submit" class="btn-login">Đăng Nhập</button>
+                
+                <div class="login-links">
+                    <p>
+                        <a id="forgot-password" asp-page="./ForgotPassword">Quên mật khẩu?</a>
+                    </p>
+                    <p>
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Đăng ký tài khoản mới</a>
+                    </p>
+                    <p>
+                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Gửi lại email xác nhận</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Phần đăng nhập bằng dịch vụ khác -->
+        <div class="external-section">
+            <h3 class="external-login-title">Đăng Nhập Nhanh</h3>
+            
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <div class="no-external-services">
+                        <p class="external-login-description">
+                            Hiện tại chưa có dịch vụ đăng nhập bên ngoài nào được cấu hình.
+                        </p>
+                        <p>
+                            Xem <a href="https://go.microsoft.com/fwlink/?LinkID=532715" target="_blank">hướng dẫn cấu hình</a> 
+                            để thiết lập đăng nhập qua các dịch vụ bên ngoài.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <p class="external-login-description">
+                        Sử dụng một trong các dịch vụ sau để đăng nhập nhanh chóng
+                    </p>
+                    
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" class="btn-external" name="provider" value="@provider.Name" title="Đăng nhập bằng @provider.DisplayName">
+                                <i class="fab fa-@provider.Name.ToLower()"></i>
+                                Đăng nhập với @provider.DisplayName
+                            </button>
+                        }
+                    </form>
+                }
+            }
+            
+            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <div class="divider">
+                    <span>hoặc</span>
+                </div>
+                
+                <div style="text-align: center;">
+                    <p style="color: #666; font-size: 14px;">
+                        Chưa có tài khoản? 
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" style="color: #667eea; font-weight: 600;">
+                            Đăng ký ngay
+                        </a>
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
